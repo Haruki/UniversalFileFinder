@@ -12,3 +12,7 @@
 hs_err_pid*
 /bin/
 /.gradle/
+.checkstyle
+.classpath
+.project
+.settings
