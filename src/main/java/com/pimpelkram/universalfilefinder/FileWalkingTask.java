@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.pimpelkram.universalfilefinder.config.Settings;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -49,7 +50,7 @@ public class FileWalkingTask extends Task<ObservableList<String>> {
 
 	private void handlePathFile(Path p) {
 		logger.debug(p.toString());
-		getPackageList().add(p.toString());
+		Platform.runLater(() -> getPackageList().add(p.toString()));
 	}
 
 }
