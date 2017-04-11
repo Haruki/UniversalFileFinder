@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.TextField?>
+<?import  org.controlsfx.control.textfield.CustomTextField?>
 
 
-<TextField fx:id="autocomplete" minWidth="300.0" promptText="fileName" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pimpelkram.universalfilefinder.AutocompleteController" />
+<CustomTextField fx:id="autocomplete" minWidth="300.0" promptText="fileName" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pimpelkram.universalfilefinder.AutocompleteController" />
