@@ -17,40 +17,41 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    Logger logger = LoggerFactory.getLogger(Main.class);
+	Logger logger = LoggerFactory.getLogger(Main.class);
 
-    private final GuiceContext context = new GuiceContext(this, () -> Arrays.asList(new DefaultModule()));
-    @Inject
-    FXMLLoader fxmlLoader;
+	private final GuiceContext context = new GuiceContext(this, () -> Arrays.asList(new DefaultModule()));
+	@Inject
+	FXMLLoader fxmlLoader;
 
-    public static void main(String[] args) {
-        launch(args);
-    }
+	public static void main(String[] args) {
+		launch(args);
+	}
 
-    @Override
-    public void init() {
-        logger.debug("Main FXApplication 'init' start.");
-        logger.debug("Main FXApplication 'init' end.");
-    }
+	@Override
+	public void init() {
+		logger.debug("Main FXApplication 'init' start.");
+		logger.debug("Main FXApplication 'init' end.");
+	}
 
-    @Override
-    public void stop() {
-        logger.debug("Main FXApplication 'stop' start.");
-        logger.debug("Main FXApplication 'stop' end.");
-    }
+	@Override
+	public void stop() {
+		logger.debug("Main FXApplication 'stop' start.");
+		logger.debug("Main FXApplication 'stop' end.");
+	}
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        logger.debug("Main FXApplication 'start' start.");
-        context.init();
-        fxmlLoader.setLocation(getClass().getResource("/UniversalFileFinderMain.fxml"));
-        fxmlLoader.load();
-        final Parent view = fxmlLoader.getRoot();
-        primaryStage.setTitle("UniversalFileFinder");
-        primaryStage.setScene(new Scene(view));
-        primaryStage.show();
-        logger.debug("Main FXApplication 'start' end.");
-    }
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		logger.debug("Main FXApplication 'start' start.");
+		// primaryStage.initStyle(StageStyle.TRANSPARENT);
+		primaryStage.setAlwaysOnTop(true);
+		context.init();
+		fxmlLoader.setLocation(getClass().getResource("/UniversalFileFinderMain.fxml"));
+		fxmlLoader.load();
+		final Parent view = fxmlLoader.getRoot();
+		primaryStage.setTitle("UniversalFileFinder");
+		primaryStage.setScene(new Scene(view));
+		primaryStage.show();
+		logger.debug("Main FXApplication 'start' end.");
+	}
 
 }
-

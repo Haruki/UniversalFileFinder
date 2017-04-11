@@ -13,19 +13,19 @@ import com.pimpelkram.universalfilefinder.config.Settings;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
 
-public class FileWalkingTask extends Task<ObservableList<String>> {
+public class FileWalkingTask extends Task<ObservableMap<String, String>> {
 
 	private final Logger logger = LoggerFactory.getLogger(FileWalkingTask.class);
-	private final ObservableList<String> packageList = FXCollections.observableArrayList();
+	private final ObservableMap<String, String> packageList = FXCollections.observableHashMap();
 
 	@Inject
 	Settings settings;
 
 	@Override
-	protected ObservableList<String> call() throws Exception {
+	protected ObservableMap<String, String> call() throws Exception {
 		logger.debug("FileWalkerTask call() start...");
 		for (final String rootPathString : settings.getRootFolderList()) {
 			try {
@@ -44,13 +44,15 @@ public class FileWalkingTask extends Task<ObservableList<String>> {
 		return getPackageList();
 	}
 
-	public ObservableList<String> getPackageList() {
+	public ObservableMap<String, String> getPackageList() {
 		return packageList;
 	}
 
 	private void handlePathFile(Path p) {
 		logger.debug(p.toString());
-		Platform.runLater(() -> getPackageList().add(p.toString()));
+		final String[] splits = p.toString().split("\\\\");
+		final String shortString = "(" + splits[5] + ") " + splits[7];
+		Platform.runLater(() -> getPackageList().put(shortString, p.toString()));
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.pimpelkram.universalfilefinder;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
@@ -35,13 +36,15 @@ public class AutocompleteController {
 		fwtThread.setDaemon(true);
 		fwtThread.start();
 		final AutoCompletionBinding<String> acb = TextFields.bindAutoCompletion(autocomplete,
-				p -> fwt.getPackageList().filtered(s -> s.contains(p.getUserText())));
+				p -> fwt.getPackageList().keySet().stream()
+						.filter(s -> s.toLowerCase().contains(p.getUserText().toLowerCase()))
+						.collect(Collectors.toSet()));
 		// setup drag&drop:
 		autocomplete.setOnDragDetected(e -> {
 			final Dragboard db = autocomplete.startDragAndDrop(TransferMode.COPY);
 			final ClipboardContent cc = new ClipboardContent();
 			final ArrayList<String> selectedPaths = new ArrayList<>();
-			selectedPaths.add(autocomplete.getText());
+			selectedPaths.add(fwt.getPackageList().get(autocomplete.getText()));
 			cc.putFilesByPath(selectedPaths);
 			db.setContent(cc);
 		});
