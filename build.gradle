@@ -1,5 +1,8 @@
-apply plugin: 'java'
+plugins {
+  id "us.kirchmeier.capsule" version "1.0.2"
+}
 
+apply plugin: 'java'
 repositories {
     mavenCentral()
 }
@@ -23,4 +26,8 @@ dependencies {
     // 'test.useTestNG()' to your build script.
     testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
 	testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+}
+
+task fatCapsule(type: FatCapsule) {
+  applicationClass 'com.pimpelkram.universalfilefinder.Main'
 }
