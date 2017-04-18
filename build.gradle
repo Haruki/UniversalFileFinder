@@ -2,7 +2,12 @@ plugins {
   id "us.kirchmeier.capsule" version "1.0.2"
 }
 
+group 'gl.hb'
+version '0.1.0'
 apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
 repositories {
     mavenCentral()
 }
