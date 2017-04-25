@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import  org.controlsfx.control.textfield.CustomTextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import org.controlsfx.control.textfield.CustomTextField?>
 
-
-<CustomTextField fx:id="autocomplete" minWidth="300.0" promptText="fileName" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pimpelkram.universalfilefinder.AutocompleteController" />
+<HBox xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pimpelkram.universalfilefinder.AutocompleteController">
+   <children>
+      <Button id="dragButton" fx:id="dragButton" minWidth="30.0" mnemonicParsing="false" />
+      <CustomTextField fx:id="autocomplete" minWidth="300.0" promptText="fileName" />
+   </children>
+</HBox>

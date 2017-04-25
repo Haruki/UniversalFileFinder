@@ -15,6 +15,7 @@ import com.pimpelkram.universalfilefinder.config.Settings;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -26,6 +27,9 @@ public class AutocompleteController {
 
 	@Inject
 	private Settings settings;
+
+	@FXML
+	private Button dragButton;
 
 	@Inject
 	private FileWalkingTask fwt;
@@ -55,8 +59,11 @@ public class AutocompleteController {
 			final ClipboardContent cc = new ClipboardContent();
 			final ArrayList<String> selectedPaths = new ArrayList<>();
 			selectedPaths.add(fwt.getPackageList().get(autocomplete.getText()));
-			cc.putFilesByPath(selectedPaths);
-			db.setContent(cc);
+			if (selectedPaths != null && !selectedPaths.isEmpty() && (selectedPaths.get(0) != null)) {
+				logger.debug("selectedPaths: " + selectedPaths.get(0));
+				cc.putFilesByPath(selectedPaths);
+				db.setContent(cc);
+			}
 		});
 		logger.debug("Ende init AutocompleteController.");
 	}
