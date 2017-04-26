@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'gl.hb'
-version '0.1.0'
+version '0.2.0'
 apply plugin: 'java'
 
 sourceCompatibility = 1.8
@@ -23,6 +23,7 @@ dependencies {
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.6.2'
     compile 'org.apache.logging.log4j:log4j-core:2.6.2'
     compile 'org.controlsfx:controlsfx:8.40.12'
+    compile 'de.codecentric.centerdevice:javafxsvg:1.2.1'
     
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
