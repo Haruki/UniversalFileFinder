@@ -59,7 +59,7 @@ public class Main extends Application {
 		fxmlLoader.setLocation(getClass().getResource("/UniversalFileFinderMain.fxml"));
 		fxmlLoader.load();
 		final Parent view = fxmlLoader.getRoot();
-		final Node node = view.lookup("#dragButton");
+		// final Node node = view.lookup("#dragButton");
 		final Node image = view.lookup("#image");
 		final Node imageStackPane = view.lookup("#imageStackPane");
 		final Node mainHBox = view.lookup("#mainHBox");
@@ -70,7 +70,7 @@ public class Main extends Application {
 		// + "-fx-background-size: 20 20; " + "-fx-background-position: center;"
 		// + "-fx-background-repeat: no-repeat;" + "-fx-background:
 		// transparent;");
-		logger.debug("Found DragButton: " + (node != null));
+		// logger.debug("Found DragButton: " + (node != null));
 		EffectUtilities.makeDraggable(primaryStage, image);
 		primaryStage.setTitle("UniversalFileFinder");
 		final Scene scene = new Scene(view);

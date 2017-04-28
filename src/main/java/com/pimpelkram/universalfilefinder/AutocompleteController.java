@@ -15,7 +15,6 @@ import com.pimpelkram.universalfilefinder.config.Settings;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -28,8 +27,8 @@ public class AutocompleteController {
 	@Inject
 	private Settings settings;
 
-	@FXML
-	private Button dragButton;
+	// @FXML
+	// private Button dragButton;
 
 	@Inject
 	private FileWalkingTask fwt;
