@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.controlsfx.control.textfield.TextFields;
+import org.reactfx.EventSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,11 @@ public class AutocompleteController {
 	private CustomTextField autocomplete;
 
 	public void initialize() {
+
+		final EventSource<Integer> numbers = new EventSource<>();
+		numbers.subscribe(i -> System.out.println(i));
+		numbers.push(7);
+
 		logger.debug("Start init AutocompleteController.");
 		// autocomplete = TextFields.createClearableTextField();
 		try {
