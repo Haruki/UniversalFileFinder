@@ -2,8 +2,6 @@ package com.pimpelkram.uff.test;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
@@ -37,12 +35,12 @@ public class MainTest {
 			final Path configPath = Paths.get(pathToHome + File.separator + "testConfig.yml");
 			logger.debug(configPath.toString());
 			Config config;
-			final Yaml yaml = new Yaml();
+			Yaml yaml = new Yaml();
 			config = yaml.loadAs(new FileInputStream(configPath.toString()), Config.class);
-			System.out.println(config);
+			// System.out.println(config);
 			for (final String dir : config.directories) {
 				try {
-					System.out.println(dir);
+					// System.out.println(dir);
 					o.onNext(new DirectoryEvent(ChangeTyp.I, dir));
 				} catch (final Exception e) {
 					o.onError(e.fillInStackTrace());
@@ -51,8 +49,9 @@ public class MainTest {
 
 			final WatchService watcher = configPath.getFileSystem().newWatchService();
 
-			final WatchKey key = configPath.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+			final WatchKey key = configPath.getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
 
+			int count = 0;
 			for (;;) {
 				watcher.take();
 				for (final WatchEvent<?> event : key.pollEvents()) {
@@ -74,24 +73,43 @@ public class MainTest {
 
 					// Verify that the new
 					// file is a text file.
-					try {
-						// Resolve the filename against the directory.
-						// If the filename is "test" and the directory is "foo",
-						// the resolved name is "test/foo".
-						// final Path child = Paths.resolve(filename);
-						if (!Files.probeContentType(filename).equals("text/plain")) {
-							System.err.format("New file '%s'" + " is not a plain text file.%n", filename);
-							continue;
-						}
-					} catch (final IOException x) {
-						System.err.println(x);
-						continue;
-					}
+					// try {
+					// // Resolve the filename against the directory.
+					// // If the filename is "test" and the directory is "foo",
+					// // the resolved name is "test/foo".
+					// // final Path child = Paths.resolve(filename);
+					// if
+					// (!Files.probeContentType(filename).equals("text/plain"))
+					// {
+					// System.err.format("New file '%s'" + " is not a plain text
+					// file.%n", filename);
+					// continue;
+					// }
+					// } catch (final IOException x) {
+					// System.err.println(x);
+					// continue;
+					// }
 
 					// Email the file to the
 					// specified email alias.
-					System.out.format("Emailing file %s%n", filename);
-					// Details left to reader....
+					// System.out.format("Emailing file %s%n", filename);
+					if (filename.getFileName().toString().equals("testConfig.yml")) {
+						if ((++count) % 2 == 0) {
+							// Neu Laden:
+							yaml = new Yaml();
+							config = yaml.loadAs(new FileInputStream(configPath.toString()), Config.class);
+							// System.out.println(config);
+							for (final String dir : config.directories) {
+								try {
+									// System.out.println(dir);
+									o.onNext(new DirectoryEvent(ChangeTyp.U, dir));
+								} catch (final Exception e) {
+									o.onError(e.fillInStackTrace());
+								}
+							}
+						}
+					}
+
 				}
 
 				// Reset the key -- this step is critical if you want to
@@ -105,12 +123,12 @@ public class MainTest {
 
 		});
 
-		// directoryStream.subscribe(event ->
-		// System.out.println(event.getChangeTyp() + " " +
-		// event.getPathName()));
+		// directoryStream.subscribe(
+		// event -> System.out.println("Subscriber 1: " + event.getChangeTyp() +
+		// " " + event.getPathName()));
 
 		directoryStream.flatMap(directoryEvent -> Observable.just(directoryEvent).subscribeOn(Schedulers.computation()))
-				.blockingSubscribe(s -> System.out.println(s));
+				.subscribe(s -> System.out.println("final step: " + s.getPathName() + "  " + s.getChangeTyp()));
 
 	}
 
