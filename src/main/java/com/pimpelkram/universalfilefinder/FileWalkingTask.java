@@ -51,7 +51,9 @@ public class FileWalkingTask extends Task<ObservableMap<String, String>> {
 	private void handlePathFile(Path p) {
 		logger.debug(p.toString());
 		final String[] splits = p.toString().split("\\\\");
-		final String shortString = "(" + splits[5] + ") " + splits[7];
+		logger.debug("Splitlength: " + splits.length);
+		final String shortString = "(" + splits[splits.length - 3] + ") " + splits[splits.length - 1];
+		logger.debug("handlePathFile shortString: " + shortString);
 		Platform.runLater(() -> getPackageList().put(shortString, p.toString()));
 	}
 
