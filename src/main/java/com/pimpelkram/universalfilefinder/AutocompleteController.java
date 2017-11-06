@@ -18,6 +18,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
 
 public class AutocompleteController {
@@ -62,6 +63,14 @@ public class AutocompleteController {
 				logger.debug("selectedPaths: " + selectedPaths.get(0));
 				cc.putFilesByPath(selectedPaths);
 				db.setContent(cc);
+			}
+		});
+		//setup select on doubleClick
+		autocomplete.setOnMouseClicked(e -> {
+			if(e.getButton() == MouseButton.PRIMARY 
+					/*&& e. 
+					getClickCount() == 2*/) {
+				autocomplete.selectAll();
 			}
 		});
 		logger.debug("Ende init AutocompleteController.");
