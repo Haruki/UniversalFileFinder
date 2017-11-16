@@ -8,17 +8,17 @@
 <?import javafx.scene.layout.StackPane?>
 <?import org.controlsfx.control.textfield.CustomTextField?>
 
-<HBox id="mainHBox" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pimpelkram.universalfilefinder.AutocompleteController">
+<HBox id="mainHBox" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pimpelkram.universalfilefinder.AutocompleteController">
    <children>
       <StackPane id="imageStackPane">
          <children>
             <ImageView id="image" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="/search.png" />
-               </image>
                <effect>
                   <GaussianBlur radius="1.0" />
                </effect>
+               <image>
+                  <Image url="@search.png" />
+               </image>
             </ImageView>
          </children>
          <padding>
