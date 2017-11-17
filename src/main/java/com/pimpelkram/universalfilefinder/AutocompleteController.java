@@ -100,6 +100,7 @@ public class AutocompleteController {
 							});
 							// FileChange elem = this.queue.take();
 							// this.logger.debug("FileEvent: " + elem);
+							this.queue.clear();
 						}
 					});
 

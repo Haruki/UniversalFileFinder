@@ -44,7 +44,9 @@ class FileChange {
 	}
 
 	public String getShortString() {
-		return "(" + this.splits[this.splits.length - 3] + ") " + this.splits[this.splits.length - 1];
+		int lowIndex = this.splits.length - 3;
+		int useIndex = (lowIndex) < 0 ? 0 : lowIndex;
+		return "(" + this.splits[useIndex] + ") " + this.splits[this.splits.length - 1];
 	}
 
 	public FileEvent getFileEvent() {
@@ -100,10 +102,11 @@ public class FileChangeDetection implements Runnable {
 
 			for (WatchEvent<?> event : key.pollEvents()) {
 				WatchEvent.Kind<?> kind = event.kind();
+				// @SuppressWarnings("unchecked")
+				// WatchEvent<Path> ev = (WatchEvent<Path>) event;
 				@SuppressWarnings("unchecked")
-				WatchEvent<Path> ev = (WatchEvent<Path>) event;
-				Path file = ev.context();
-				this.logger.debug("New Event: " + file.toString());
+				Path file = ((Path) key.watchable()).resolve(((WatchEvent<Path>) event).context());
+				this.logger.debug("New Event: " + file.toString() + " " + file.toAbsolutePath().toString());
 				switch (kind.name()) {
 				case "ENTRY_OVERFLOW":
 					continue;
