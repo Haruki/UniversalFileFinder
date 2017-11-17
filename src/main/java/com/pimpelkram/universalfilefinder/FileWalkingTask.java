@@ -1,5 +1,6 @@
 package com.pimpelkram.universalfilefinder;
 
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -26,34 +27,35 @@ public class FileWalkingTask extends Task<ObservableMap<String, String>> {
 
 	@Override
 	protected ObservableMap<String, String> call() throws Exception {
-		logger.debug("FileWalkerTask call() start...");
-		for (final String rootPathString : settings.getRootFolderList()) {
+		this.logger.debug("FileWalkerTask call() start...");
+		for (final String rootPathString : this.settings.getRootFolderList()) {
 			try {
-				logger.debug("rootPathString : " + rootPathString);
-				logger.debug(String.valueOf(Files.exists(Paths.get(rootPathString))));
-				Files.walk(Paths.get(rootPathString)).filter(p -> !Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS))
+				this.logger.debug("rootPathString : " + rootPathString);
+				this.logger.debug(String.valueOf(Files.exists(Paths.get(rootPathString))));
+				Files.walk(Paths.get(rootPathString), 1, FileVisitOption.FOLLOW_LINKS)
+						.filter(p -> !Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS))
 						// .filter(p -> p.toString().matches(getPositiveRegex())
 						// && !p.toString().matches(getNegativeRegex()))
 						.forEach(p -> handlePathFile(p));
-				logger.debug("finished for loop");
+				this.logger.debug("finished for loop");
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
-		logger.debug("FileWalkerTask call() end...");
+		this.logger.debug("FileWalkerTask call() end...");
 		return getPackageList();
 	}
 
 	public ObservableMap<String, String> getPackageList() {
-		return packageList;
+		return this.packageList;
 	}
 
 	private void handlePathFile(Path p) {
-		logger.debug(p.toString());
+		this.logger.debug(p.toString());
 		final String[] splits = p.toString().split("\\\\");
-		logger.debug("Splitlength: " + splits.length);
+		// logger.debug("Splitlength: " + splits.length);
 		final String shortString = "(" + splits[splits.length - 3] + ") " + splits[splits.length - 1];
-		logger.debug("handlePathFile shortString: " + shortString);
+		// logger.debug("handlePathFile shortString: " + shortString);
 		Platform.runLater(() -> getPackageList().put(shortString, p.toString()));
 	}
 

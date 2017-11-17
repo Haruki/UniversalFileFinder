@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
 import org.controlsfx.control.textfield.AutoCompletionBinding;
@@ -20,7 +21,9 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.pimpelkram.universalfilefinder.config.Settings;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
@@ -46,16 +49,77 @@ public class AutocompleteController {
 	@Inject
 	EventBus eventBus;
 
-	private ExecutorService pool = Executors.newFixedThreadPool(10);
+	private Thread listUpdater;
+
+	private LinkedBlockingQueue<FileChange> fileEventQueue = new LinkedBlockingQueue<>();
+
+	private ExecutorService pool = Executors.newCachedThreadPool();
+
+	private class ListUpdater implements Runnable {
+		private Logger logger = LoggerFactory.getLogger(ListUpdater.class);
+
+		private LinkedBlockingQueue<FileChange> queue;
+		private ObservableMap<String, String> dataMap;
+
+		// <T> Predicate<T> distinctByName(Function<? super T, ?> nameExtractor) {
+		// Set<Object> seen = ConcurrentHashMap.newKeySet();
+		// return t -> seen.add(nameExtractor.apply(t));
+		// }
+
+		public ListUpdater(LinkedBlockingQueue<FileChange> queue, ObservableMap<String, String> dataMap) {
+			this.queue = queue;
+			this.dataMap = dataMap;
+		}
+
+		@Override
+		public void run() {
+			this.logger.debug("Start ListUpdater Thread");
+			for (;;) {
+				try {
+					Thread.sleep(3000);
+					this.logger.debug("ListUpdater Checking...");
+					Platform.runLater(() -> {
+						while (!this.queue.isEmpty()) {
+							this.queue.stream().distinct().forEach(fc -> {
+								switch (fc.getFileEvent()) {
+								case DELETED:
+									this.logger.debug("Deleted: " + fc.getShortString());
+									this.dataMap.remove(fc.getShortString());
+									break;
+								case CREATED:
+									this.logger.debug("Created: " + fc.getShortString());
+									this.dataMap.put(fc.getShortString(), fc.getPath().toString());
+									break;
+								case MODIFIED:
+									this.logger.debug("Modified: " + fc.getShortString());
+									break;
+								default:
+									this.logger.debug("WARN: what happened here?? " + fc.getShortString());
+									break;
+								}
+							});
+							// FileChange elem = this.queue.take();
+							// this.logger.debug("FileEvent: " + elem);
+						}
+					});
+
+				} catch (InterruptedException e) {
+					this.logger.debug("Stopping ListUpdater Thread.");
+					return;
+				}
+			}
+
+		}
+	}
 
 	public void initialize() {
 
 		// pool test:
 		for (String dir : this.settings.getRootFolderList()) {
 			Path path = Paths.get(dir);
-			this.pool.submit(new FileChangeDetection(this.eventBus, path));
+			this.pool.submit(new FileChangeDetection(this.fileEventQueue, path));
 		}
-		this.eventBus.register(this);
+		// this.eventBus.register(this);
 
 		final EventSource<Integer> numbers = new EventSource<>();
 		numbers.subscribe(i -> System.out.println(i));
@@ -88,6 +152,10 @@ public class AutocompleteController {
 				db.setContent(cc);
 			}
 		});
+
+		this.listUpdater = new Thread(new ListUpdater(this.fileEventQueue, this.fwt.getPackageList()));
+		this.listUpdater.setDaemon(true);
+		this.listUpdater.start();
 		this.logger.debug("Ende init AutocompleteController.");
 	}
 
@@ -96,6 +164,15 @@ public class AutocompleteController {
 				ObjectProperty.class);
 		m.setAccessible(true);
 		m.invoke(null, customTextField, customTextField.rightProperty());
+	}
+
+	@FXML
+	public void exitApplication() {
+		this.logger.debug("interrupting ListUpdater Thread...");
+		this.listUpdater.interrupt();
+		// Platform.exit();
+		this.logger.debug("Stopping executor...");
+		this.pool.shutdownNow();
 	}
 
 	@Subscribe

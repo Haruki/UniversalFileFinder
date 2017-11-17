@@ -7,20 +7,73 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.EventBus;
+enum FileEvent {
+	MODIFIED("Modified", "c"), CREATED("New", "+"), DELETED("Deleted", "-");
+
+	private String nameLong;
+	private String symbol;
+
+	private FileEvent(String nameLong, String symbol) {
+		this.nameLong = nameLong;
+		this.symbol = symbol;
+	}
+
+	public String getSymbol() {
+		return this.symbol;
+	}
+
+	public String getNameLong() {
+		return this.nameLong;
+	}
+}
+
+class FileChange {
+	private Path path;
+	private FileEvent event;
+	private String[] splits;
+
+	public FileChange(Path path, FileEvent event) {
+		this.path = path;
+		this.event = event;
+		this.splits = path.toString().split("\\\\");
+	}
+
+	public String getShortString() {
+		return "(" + this.splits[this.splits.length - 3] + ") " + this.splits[this.splits.length - 1];
+	}
+
+	public FileEvent getFileEvent() {
+		return this.event;
+	}
+
+	public Path getPath() {
+		return this.path;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		return getShortString().equals(((FileChange) other).getShortString());
+	}
+
+	@Override
+	public int hashCode() {
+		return getShortString().hashCode();
+	}
+}
 
 public class FileChangeDetection implements Runnable {
 
 	private final Logger logger = LoggerFactory.getLogger(FileChangeDetection.class);
-	private EventBus eventBus;
 	private Path targetPath;
+	private LinkedBlockingQueue<FileChange> queue;
 
-	public FileChangeDetection(EventBus eventBus, Path targetPath) {
-		this.eventBus = eventBus;
+	public FileChangeDetection(LinkedBlockingQueue<FileChange> queue, Path targetPath) {
+		this.queue = queue;
 		this.targetPath = targetPath;
 	}
 
@@ -37,23 +90,36 @@ public class FileChangeDetection implements Runnable {
 		} catch (IOException e) {
 			this.logger.error(e.getMessage());
 		}
-		for (;;) {
+		while (!Thread.currentThread().isInterrupted()) {
 			try {
 				key = watcher.take();
 			} catch (InterruptedException x) {
+				this.logger.debug("FileWatcher Thread terminating. " + Thread.currentThread().getName());
 				return;
 			}
 
 			for (WatchEvent<?> event : key.pollEvents()) {
 				WatchEvent.Kind<?> kind = event.kind();
-				if (kind == StandardWatchEventKinds.OVERFLOW) {
-					continue;
-				}
 				@SuppressWarnings("unchecked")
 				WatchEvent<Path> ev = (WatchEvent<Path>) event;
-				Path filename = ev.context();
-				this.logger.debug("New Event: " + filename);
-				this.eventBus.post(filename);
+				Path file = ev.context();
+				this.logger.debug("New Event: " + file.toString());
+				switch (kind.name()) {
+				case "ENTRY_OVERFLOW":
+					continue;
+				case "ENTRY_MODIFY":
+					this.queue.offer(new FileChange(file, FileEvent.MODIFIED));
+					break;
+				case "ENTRY_CREATE":
+					this.queue.offer(new FileChange(file, FileEvent.CREATED));
+					break;
+				case "ENTRY_DELETE":
+					this.queue.offer(new FileChange(file, FileEvent.DELETED));
+					break;
+				default:
+					break;
+
+				}
 				continue;
 			}
 
@@ -65,6 +131,7 @@ public class FileChangeDetection implements Runnable {
 				break;
 			}
 		}
+		this.logger.debug("Executor Thread EXIT! : " + Thread.currentThread().getName());
 
 	}
 

@@ -31,34 +31,38 @@ public class Main extends Application {
 	@Inject
 	FXMLLoader fxmlLoader;
 
+	private AutocompleteController controller;
+
 	public static void main(String[] args) {
 		launch(args);
 	}
 
 	@Override
 	public void init() {
-		logger.debug("Main FXApplication 'init' start.");
+		this.logger.debug("Main FXApplication 'init' start.");
 		// logger.debug("init SvgImageLoader Factory...");
 		// SvgImageLoaderFactory.install();
-		logger.debug("Main FXApplication 'init' end.");
+		this.logger.debug("Main FXApplication 'init' end.");
 	}
 
 	@Override
 	public void stop() {
-		logger.debug("Main FXApplication 'stop' start.");
-		logger.debug("Main FXApplication 'stop' end.");
+		this.logger.debug("Main FXApplication 'stop' start.");
+		this.controller.exitApplication();
+		this.logger.debug("Main FXApplication 'stop' end.");
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream("/search.png")));
-		logger.debug("Main FXApplication 'start' start.");
+		this.logger.debug("Main FXApplication 'start' start.");
 		primaryStage.initStyle(StageStyle.TRANSPARENT);
 		primaryStage.setAlwaysOnTop(true);
-		context.init();
-		fxmlLoader.setLocation(getClass().getResource("/UniversalFileFinderMain.fxml"));
-		fxmlLoader.load();
-		final Parent view = fxmlLoader.getRoot();
+		this.context.init();
+		this.fxmlLoader.setLocation(getClass().getResource("/UniversalFileFinderMain.fxml"));
+		this.fxmlLoader.load();
+		this.controller = this.fxmlLoader.getController();
+		final Parent view = this.fxmlLoader.getRoot();
 		// final Node node = view.lookup("#dragButton");
 		final Node image = view.lookup("#image");
 		final Node imageStackPane = view.lookup("#imageStackPane");
@@ -74,11 +78,11 @@ public class Main extends Application {
 		EffectUtilities.makeDraggable(primaryStage, image);
 		primaryStage.setTitle("UniversalFileFinder");
 		final Scene scene = new Scene(view);
-		logger.debug(scene.getAntiAliasing().toString());
+		this.logger.debug(scene.getAntiAliasing().toString());
 		scene.setFill(Color.TRANSPARENT);
 		primaryStage.setScene(scene);
 		primaryStage.show();
-		logger.debug("Main FXApplication 'start' end.");
+		this.logger.debug("Main FXApplication 'start' end.");
 	}
 
 }
