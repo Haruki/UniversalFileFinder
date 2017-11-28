@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.CustomTextField;
@@ -136,7 +137,14 @@ public class AutocompleteController {
                 db.setContent(cc);
             }
         });
-
+        //setup select on doubleClick
+        autocomplete.setOnMouseClicked(e -> {
+            if (e.getButton() == MouseButton.PRIMARY
+                    /*&& e.
+                    getClickCount() == 2*/) {
+                autocomplete.selectAll();
+            }
+        });
         this.listUpdater = new Thread(new ListUpdater(this.fileEventQueue, this.fwt.getPackageList()));
         this.listUpdater.setDaemon(true);
         this.listUpdater.start();

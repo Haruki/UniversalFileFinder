@@ -98,17 +98,20 @@ public class FileChangeDetection implements Runnable {
             for (WatchEvent<?> event : key.pollEvents()) {
                 WatchEvent.Kind<?> kind = event.kind();
                 Path file = ((Path) key.watchable()).resolve(((WatchEvent<Path>) event).context());
-                this.logger.debug("New Event: " + file.toString() + " " + file.toAbsolutePath().toString());
+                // this.logger.debug("New Event: " + file.toString() + " " + file.toAbsolutePath().toString());
                 switch (kind.name()) {
                     case "ENTRY_OVERFLOW":
-                        continue;
-                    case "ENTRY_MODIFY":
+               continue;
+                   case "ENTRY_MODIFY":
+                        logger.debug("New Event: Modify - " + file.toString());
                         this.queue.offer(new FileChange(file, FileEvent.MODIFIED));
                         break;
                     case "ENTRY_CREATE":
+                        logger.debug("New Event: Create - " + file.toString());
                         this.queue.offer(new FileChange(file, FileEvent.CREATED));
                         break;
                     case "ENTRY_DELETE":
+                        logger.debug("New Event: Delete - " + file.toString());
                         this.queue.offer(new FileChange(file, FileEvent.DELETED));
                         break;
                     default:
