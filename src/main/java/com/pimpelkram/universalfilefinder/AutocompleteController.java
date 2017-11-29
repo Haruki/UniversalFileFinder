@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -121,8 +122,8 @@ public class AutocompleteController {
 		fwtThread.start();
 		/* final AutoCompletionBinding<String> acb = */TextFields.bindAutoCompletion(this.autocomplete,
 				p -> this.fwt.getPackageList().keySet().stream()
-						.filter(s -> s.toLowerCase().contains(p.getUserText().toLowerCase())).sorted()
-						.collect(Collectors.toSet()));
+						.filter(s -> s.toLowerCase().contains(p.getUserText().toLowerCase())).map(s -> s.toLowerCase())
+						.sorted().collect(Collectors.toCollection(TreeSet::new)));
 		// setup drag&drop:
 		this.autocomplete.setOnDragDetected(e -> {
 			final Dragboard db = this.autocomplete.startDragAndDrop(TransferMode.COPY);
