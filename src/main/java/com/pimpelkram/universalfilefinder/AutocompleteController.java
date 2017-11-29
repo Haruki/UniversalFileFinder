@@ -1,5 +1,6 @@
 package com.pimpelkram.universalfilefinder;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,7 +10,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
-import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.controlsfx.control.textfield.TextFields;
 import org.slf4j.Logger;
@@ -115,16 +115,11 @@ public class AutocompleteController {
 			this.pool.submit(new FileChangeDetection(this.fileEventQueue, path));
 		}
 		this.logger.debug("Start init AutocompleteController.");
-		try {
-			setupClearButtonField(this.autocomplete);
-		} catch (final Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		setupClearButtonField(this.autocomplete);
 		final Thread fwtThread = new Thread(this.fwt);
 		fwtThread.setDaemon(true);
 		fwtThread.start();
-		final AutoCompletionBinding<String> acb = TextFields.bindAutoCompletion(this.autocomplete,
+		/* final AutoCompletionBinding<String> acb = */TextFields.bindAutoCompletion(this.autocomplete,
 				p -> this.fwt.getPackageList().keySet().stream()
 						.filter(s -> s.toLowerCase().contains(p.getUserText().toLowerCase())).sorted()
 						.collect(Collectors.toSet()));
@@ -155,11 +150,16 @@ public class AutocompleteController {
 		this.logger.debug("Ende init AutocompleteController.");
 	}
 
-	private void setupClearButtonField(CustomTextField customTextField) throws Exception {
-		final Method m = TextFields.class.getDeclaredMethod("setupClearButtonField", TextField.class,
-				ObjectProperty.class);
-		m.setAccessible(true);
-		m.invoke(null, customTextField, customTextField.rightProperty());
+	private void setupClearButtonField(CustomTextField customTextField) {
+		Method m;
+		try {
+			m = TextFields.class.getDeclaredMethod("setupClearButtonField", TextField.class, ObjectProperty.class);
+			m.setAccessible(true);
+			m.invoke(null, customTextField, customTextField.rightProperty());
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			this.logger.error("Fehler beim Zugriff auf die Methode 'setupClearButtonField' der Klasse Testfield.", e);
+		}
 	}
 
 	@FXML

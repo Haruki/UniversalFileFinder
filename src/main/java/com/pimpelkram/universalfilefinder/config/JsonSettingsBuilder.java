@@ -1,19 +1,19 @@
 package com.pimpelkram.universalfilefinder.config;
 
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import java.util.stream.Collectors;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import java.util.stream.Collectors;
+
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * Baut aus einer JSON-Datei das Settings-Objekt. Alle JsonStrings werden ohne
  * umschließende Anführungszeichen übernommen.
- * 
+ *
  * @author borsutzha
  */
 public class JsonSettingsBuilder {
@@ -30,7 +30,7 @@ public class JsonSettingsBuilder {
 			final ObservableList<String> rootDirStringList = FXCollections.observableArrayList(jsonRootDirList.stream()
 					.map(value -> value.toString().replaceAll("\"", "")).collect(Collectors.toList()));
 			settings.setRootFolderList(new SimpleListProperty<>(rootDirStringList));
-	} catch (final Exception e) {
+		} catch (final Exception e) {
 
 			// settings.getErrors().put(e.getMessage(), ErrorTypes.InvalidJson);
 			e.printStackTrace();
