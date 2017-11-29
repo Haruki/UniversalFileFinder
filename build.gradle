@@ -6,7 +6,7 @@ group 'gl.hb'
 version '0.5.0'
 apply plugin: 'java'
 
-sourceCompatibility = 1.9
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -17,12 +17,12 @@ ext.junitJupiterVersion = '5.0.0-M2'
 
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.21'
-    compile 'com.gluonhq:ignite-guice:1.0.0'
+    compile 'com.gluonhq:ignite-guice:+'
    // compile 'javax.json:javax.json-api:1.0'
     compile 'org.glassfish:javax.json:1.0.4'
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.6.2'
     compile 'org.apache.logging.log4j:log4j-core:2.6.2'
-    compile 'org.controlsfx:controlsfx:+'
+    compile 'org.controlsfx:controlsfx:8.40.14'
     compile 'org.yaml:snakeyaml:1.18'
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
