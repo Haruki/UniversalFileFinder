@@ -122,8 +122,8 @@ public class AutocompleteController {
 		fwtThread.start();
 		/* final AutoCompletionBinding<String> acb = */TextFields.bindAutoCompletion(this.autocomplete,
 				p -> this.fwt.getPackageList().keySet().stream()
-						.filter(s -> s.toLowerCase().contains(p.getUserText().toLowerCase())).map(s -> s.toLowerCase())
-						.sorted().collect(Collectors.toCollection(TreeSet::new)));
+						.filter(s -> s.toLowerCase().contains(p.getUserText().toLowerCase()))
+						.collect(Collectors.toCollection(TreeSet::new)));
 		// setup drag&drop:
 		this.autocomplete.setOnDragDetected(e -> {
 			final Dragboard db = this.autocomplete.startDragAndDrop(TransferMode.COPY);
