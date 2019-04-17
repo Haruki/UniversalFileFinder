@@ -16,7 +16,6 @@ public class DefaultModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        // bind(Service.class).to(Service.class);
     }
 
     @Provides

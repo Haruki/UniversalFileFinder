@@ -1,11 +1,11 @@
 package com.pimpelkram.universalfilefinder.config;
 
-import javax.json.Json;
-import javax.json.JsonReader;
-import java.io.BufferedReader;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -16,7 +16,7 @@ import java.nio.file.Paths;
  * @author borsutzha
  *
  */
-public class SettingsFileLoader implements SettingsLoader {
+public class SettingsFileLoader {
 
 	private final String homePath = System.getProperty("user.home");
 
@@ -24,36 +24,28 @@ public class SettingsFileLoader implements SettingsLoader {
 
 	private final Path settingsPath = Paths.get(homePath + "\\" + expectedFileName);
 
-	private boolean checkConfigFile() {
-		return Files.exists(settingsPath);
-	}
+	private ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
+	private Logger logger = LoggerFactory.getLogger(Settings.class);
 	/*
 	 * Lädt Settings aus einer Datei im Home-Verzeichnis. Namen sind fest
 	 * definiert. (Convention over Configuration)
 	 *
-	 * @see com.pimpelkram.deliverytool.config.SettingsLoader#getSettings()
 	 */
-	@Override
 	public Settings getSettings() {
-		Settings settings = new Settings();
-		if (!checkConfigFile()) {
-			settings.getErrors().put("Settingsdatei \"" + settingsPath.toString() + "\" konnte nicht gefunden werden!.",
-					ErrorTypes.FileNotFound);
-		} else {
-			final Charset charset = Charset.forName("UTF-8");
-			BufferedReader fileReader;
-			try {
-				fileReader = Files.newBufferedReader(settingsPath, charset);
-				final JsonReader reader = Json.createReader(fileReader);
-				settings = new JsonSettingsBuilder().build(settings, reader);
-			} catch (final IOException e) {
-				settings.getErrors().put(
-						"Settingsdatei \"" + settingsPath.toString() + "\" konnte nicht geladen werden!",
-						ErrorTypes.InvalidJson);
+		try {
+			Settings settings = mapper.readValue(settingsPath.toFile(), Settings.class);
+			if (settings != null) {
+				return settings;
+			} else {
+				logger.error("Could not not load configuration file.");
+				return null;
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			logger.error("Could not not load configuration file.");
+			return null;
 		}
-		return settings;
 	}
 
 }
