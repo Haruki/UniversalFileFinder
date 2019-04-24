@@ -22,7 +22,7 @@ public class FileWalkingTask extends Task<ObservableMap<String, String>> {
     @Override
     protected ObservableMap<String, String> call() throws Exception {
         this.logger.debug("FileWalkerTask call() start...");
-        for (final String rootPathString : this.settings.getRootFolderList()) {
+        for (final String rootPathString : this.settings.getRoot()) {
             try {
                 this.logger.debug("rootPathString : " + rootPathString);
                 this.logger.debug(String.valueOf(Files.exists(Paths.get(rootPathString))));

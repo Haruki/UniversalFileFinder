@@ -21,7 +21,7 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-core:+'
     compile 'com.fasterxml.jackson.core:jackson-databind:+'
     compile 'com.fasterxml.jackson.core:jackson-annotations:+'
-    compile 'org.apache.logging.log4j:llog4j-slf4j18-impl:2.+'
+    compile 'org.apache.logging.log4j:log4j-slf4j18-impl:+'
     compile 'org.apache.logging.log4j:log4j-core:+'
     compile 'org.controlsfx:controlsfx:8.40.14'
     testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")

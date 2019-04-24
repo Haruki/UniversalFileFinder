@@ -1,25 +1,25 @@
 package com.pimpelkram.universalfilefinder.config;
 
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.MapProperty;
+import java.util.List;
 
-/**
- * Bean Class for storing all (persistent) settings.
- *
- * @author borsutzha
- *
- */
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+/** Bean Class for storing all (persistent) settings.
+ * @author borsutzha */
 public class Settings {
 
+    private List<String> root;
 
-	private ListProperty<String> rootFolderList;
+    public List<String> getRoot() {
+        return this.root;
+    }
 
-	public ListProperty<String> getRootFolderList() {
-		return this.rootFolderList;
-	}
+    public void setRoot(List<String> rootFolderList) {
+        this.root = rootFolderList;
+    }
 
-	public void setRootFolderList(ListProperty<String> rootFolderList) {
-		this.rootFolderList = rootFolderList;
-	}
+    public Settings(@JsonProperty("root") List<String> rootList) {
+        this.root = rootList;
+    }
 
 }

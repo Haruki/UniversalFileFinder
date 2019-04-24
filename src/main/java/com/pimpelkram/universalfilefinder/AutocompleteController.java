@@ -111,7 +111,7 @@ public class AutocompleteController {
 	public void initialize() {
 
 		// pool test:
-		for (String dir : this.settings.getRootFolderList()) {
+		for (String dir : this.settings.getRoot()) {
 			Path path = Paths.get(dir);
 			this.pool.submit(new FileChangeDetection(this.fileEventQueue, path));
 		}
