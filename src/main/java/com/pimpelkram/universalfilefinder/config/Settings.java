@@ -10,6 +10,16 @@ public class Settings {
 
     private List<String> root;
 
+    private List<String> excludeRegexGlobal;
+
+    public List<String> getExcludeRegex() {
+        return this.excludeRegexGlobal;
+    }
+
+    public void setExcludeRegex(List<String> excludeRegex) {
+        this.excludeRegexGlobal = excludeRegex;
+    }
+
     public List<String> getRoot() {
         return this.root;
     }
@@ -18,8 +28,9 @@ public class Settings {
         this.root = rootFolderList;
     }
 
-    public Settings(@JsonProperty("root") List<String> rootList) {
+    public Settings(@JsonProperty("root") List<String> rootList, @JsonProperty("excludeRegexGlobal") List<String> excludeRegex) {
         this.root = rootList;
+        this.excludeRegexGlobal = excludeRegex;
     }
 
 }
