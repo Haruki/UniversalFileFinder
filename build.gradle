@@ -1,6 +1,4 @@
-plugins {
-    id "us.kirchmeier.capsule" version "1.0.2"
-}
+
 
 group 'gl.hb'
 version '0.6.0'
@@ -11,6 +9,7 @@ sourceCompatibility = 1.8
 repositories {
     mavenCentral()
 }
+
 
 ext.junitJupiterVersion = '+'
 
@@ -28,6 +27,11 @@ dependencies {
     testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 }
 
-task fatCapsule(type: FatCapsule) {
-    applicationClass 'com.pimpelkram.universalfilefinder.Main'
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.pimpelkram.universalfilefinder.Main'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
