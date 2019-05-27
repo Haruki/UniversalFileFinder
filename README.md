@@ -1,5 +1,6 @@
 # UniveralFileFinder
 Indexes and finds Files for dragging to other tools/programs
+![alt text](univeralfilefinder_demo.gif)
 
 ## Installation
 Files are available in the releases section.
