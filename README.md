@@ -1,5 +1,5 @@
 # UniveralFileFinder
-Finds Files to be dragged to Destination Tool
+Indexes and finds Files for dragging to other tools/programs
 
 ## Installation
 Files are available in the releases section.
