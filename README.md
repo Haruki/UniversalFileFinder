@@ -1,6 +1,9 @@
 # UniveralFileFinder
-Indexes and finds Files for dragging to other tools/programs
+A file finder that indexes and finds files for dragging to other tools/programs
 ![alt text](univeralfilefinder_demo.gif)
+- uses very small screen space
+- fast startup
+- automatically recognizes new and deleted files
 
 ## Installation
 Files are available in the releases section.
