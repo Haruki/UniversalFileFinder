@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/Haruki/UniveralFileFinder.svg?branch=master)](https://travis-ci.com/Haruki/UniveralFileFinder)
 # UniveralFileFinder
 A file finder that indexes and finds files for dragging to other tools/programs
 ![alt text](univeralfilefinder_demo.gif)
