@@ -110,11 +110,12 @@ public class AutocompleteController {
 
 	public void initialize() {
 
-		// pool test:
+
 		for (String dir : this.settings.getRoot()) {
 			Path path = Paths.get(dir);
-			this.pool.submit(new FileChangeDetection(this.fileEventQueue, path));
+			this.pool.submit(new FileChangeDetection(this.fileEventQueue, path, settings));
 		}
+
 		this.logger.debug("Start init AutocompleteController.");
 		setupClearButtonField(this.autocomplete);
 		final Thread fwtThread = new Thread(this.fwt);

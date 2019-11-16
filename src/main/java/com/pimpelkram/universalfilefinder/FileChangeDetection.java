@@ -71,16 +71,17 @@ public class FileChangeDetection implements Runnable {
     private Path targetPath;
     private LinkedBlockingQueue<FileChange> queue;
 
-    public FileChangeDetection(LinkedBlockingQueue<FileChange> queue, Path targetPath) {
+    public FileChangeDetection(LinkedBlockingQueue<FileChange> queue, Path targetPath, Settings settings) {
         this.queue = queue;
         this.targetPath = targetPath;
+        this.settings = settings;
     }
 
-    @Inject
     Settings settings;
 
     @Override
     public void run() {
+        logger.debug("Starting FileChange Detection!");
         WatchService watcher = null;
         WatchKey key;
         try {
@@ -92,14 +93,17 @@ public class FileChangeDetection implements Runnable {
         } catch (IOException e) {
             this.logger.error(e.getMessage());
         }
-        while (!Thread.currentThread().isInterrupted()) {
+        //while (!Thread.currentThread().isInterrupted()) {
+        while (true) {
             try {
+                logger.debug("FileChangeDetection next loop");
                 key = watcher.take();
             } catch (InterruptedException x) {
-                this.logger.debug("FileWatcher Thread terminating. " + Thread.currentThread().getName());
+                logger.debug("FileWatcher Thread terminating. " + Thread.currentThread().getName());
                 return;
             }
 
+            eventloop:
             for (WatchEvent<?> event : key.pollEvents()) {
                 WatchEvent.Kind<?> kind = event.kind();
                 @SuppressWarnings("unchecked")
@@ -109,7 +113,7 @@ public class FileChangeDetection implements Runnable {
                 if (this.settings.getExcludeRegex() != null) {
                     for (String rx : this.settings.getExcludeRegex()) {
                         if (file.toString().matches(rx)) {
-                            return;
+                            continue eventloop;
                         }
                     }
                 }
