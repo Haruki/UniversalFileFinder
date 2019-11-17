@@ -31,146 +31,139 @@ import javafx.scene.input.TransferMode;
 
 public class AutocompleteController {
 
-	private final Logger logger = LoggerFactory.getLogger(AutocompleteController.class);
+    private final Logger logger = LoggerFactory.getLogger(AutocompleteController.class);
 
-	@Inject
-	private Settings settings;
+    @Inject
+    private Settings settings;
 
-	// @FXML
-	// private Button dragButton;
+    // @FXML
+    // private Button dragButton;
 
-	@Inject
-	private FileWalkingTask fwt;
+    @Inject
+    private FileWalkingTask fwt;
 
-	@FXML
-	private CustomTextField autocomplete;
+    @FXML
+    private CustomTextField autocomplete;
 
-	private Thread listUpdater;
+    private LinkedBlockingQueue<FileChange> fileEventQueue = new LinkedBlockingQueue<>();
 
-	private LinkedBlockingQueue<FileChange> fileEventQueue = new LinkedBlockingQueue<>();
+    private ExecutorService pool = Executors.newCachedThreadPool();
 
-	private ExecutorService pool = Executors.newCachedThreadPool();
+    private static class ListUpdater implements Runnable {
+        private Logger logger = LoggerFactory.getLogger(ListUpdater.class);
 
-	private class ListUpdater implements Runnable {
-		private Logger logger = LoggerFactory.getLogger(ListUpdater.class);
+        private LinkedBlockingQueue<FileChange> queue;
+        private ObservableMap<String, String> dataMap;
 
-		private LinkedBlockingQueue<FileChange> queue;
-		private ObservableMap<String, String> dataMap;
+        // <T> Predicate<T> distinctByName(Function<? super T, ?> nameExtractor) {
+        // Set<Object> seen = ConcurrentHashMap.newKeySet();
+        // return t -> seen.add(nameExtractor.apply(t));
+        // }
 
-		// <T> Predicate<T> distinctByName(Function<? super T, ?> nameExtractor) {
-		// Set<Object> seen = ConcurrentHashMap.newKeySet();
-		// return t -> seen.add(nameExtractor.apply(t));
-		// }
+        ListUpdater(LinkedBlockingQueue<FileChange> queue, ObservableMap<String, String> dataMap) {
+            this.queue = queue;
+            this.dataMap = dataMap;
+        }
 
-		public ListUpdater(LinkedBlockingQueue<FileChange> queue, ObservableMap<String, String> dataMap) {
-			this.queue = queue;
-			this.dataMap = dataMap;
-		}
+        @Override
+        public void run() {
+            this.logger.debug("Start ListUpdater Thread");
+            for (; ; ) {
+                try {
+                    Thread.sleep(3000);
+                    this.logger.debug("ListUpdater Checking...");
+                    Platform.runLater(() -> {
+                        while (!this.queue.isEmpty()) {
+                            this.queue.stream()/* .distinct() */.forEach(fc -> {
+                                switch (fc.getFileEvent()) {
+                                    case DELETED:
+                                        this.logger.debug("Deleted: " + fc.getShortString());
+                                        this.dataMap.remove(fc.getShortString());
+                                        break;
+                                    case CREATED:
+                                        this.logger.debug("Created: " + fc.getShortString());
+                                        this.dataMap.put(fc.getShortString(), fc.getPath().toString());
+                                        break;
+                                    case MODIFIED:
+                                        this.logger.debug("Modified: " + fc.getShortString());
+                                        break;
+                                    default:
+                                        this.logger.debug("WARN: what happened here?? " + fc.getShortString());
+                                        break;
+                                }
+                            });
+                            this.queue.clear();
+                            // Collections.sort(this.dataMap);
+                        }
+                    });
 
-		@Override
-		public void run() {
-			this.logger.debug("Start ListUpdater Thread");
-			for (;;) {
-				try {
-					Thread.sleep(3000);
-					this.logger.debug("ListUpdater Checking...");
-					Platform.runLater(() -> {
-						while (!this.queue.isEmpty()) {
-							this.queue.stream()/* .distinct() */.forEach(fc -> {
-								switch (fc.getFileEvent()) {
-								case DELETED:
-									this.logger.debug("Deleted: " + fc.getShortString());
-									this.dataMap.remove(fc.getShortString());
-									break;
-								case CREATED:
-									this.logger.debug("Created: " + fc.getShortString());
-									this.dataMap.put(fc.getShortString(), fc.getPath().toString());
-									break;
-								case MODIFIED:
-									this.logger.debug("Modified: " + fc.getShortString());
-									break;
-								default:
-									this.logger.debug("WARN: what happened here?? " + fc.getShortString());
-									break;
-								}
-							});
-							this.queue.clear();
-							// Collections.sort(this.dataMap);
-						}
-					});
+                } catch (InterruptedException e) {
+                    this.logger.debug("Stopping ListUpdater Thread.");
+                    return;
+                }
+            }
 
-				} catch (InterruptedException e) {
-					this.logger.debug("Stopping ListUpdater Thread.");
-					return;
-				}
-			}
+        }
+    }
 
-		}
-	}
-
-	public void initialize() {
+    public void initialize() {
+        this.logger.debug("Start init AutocompleteController.");
 
 
-		for (String dir : this.settings.getRoot()) {
-			Path path = Paths.get(dir);
-			this.pool.submit(new FileChangeDetection(this.fileEventQueue, path, settings));
-		}
+        for (String dir : this.settings.getRoot()) {
+            Path path = Paths.get(dir);
+            this.pool.submit(new FileChangeDetection(this.fileEventQueue, path, settings));
+        }
 
-		this.logger.debug("Start init AutocompleteController.");
-		setupClearButtonField(this.autocomplete);
-		final Thread fwtThread = new Thread(this.fwt);
-		fwtThread.setDaemon(true);
-		fwtThread.start();
-		/* final AutoCompletionBinding<String> acb = */TextFields.bindAutoCompletion(this.autocomplete,
-				p -> this.fwt.getPackageList().keySet().stream()
-						.filter(s -> s.toLowerCase().contains(p.getUserText().toLowerCase()))
-						.collect(Collectors.toCollection(TreeSet::new)));
-		// setup drag&drop:
-		this.autocomplete.setOnDragDetected(e -> {
-			final Dragboard db = this.autocomplete.startDragAndDrop(TransferMode.COPY);
-			final ClipboardContent cc = new ClipboardContent();
-			final ArrayList<String> selectedPaths = new ArrayList<>();
-			selectedPaths.add(this.fwt.getPackageList().get(this.autocomplete.getText()));
-			if (selectedPaths != null && !selectedPaths.isEmpty() && (selectedPaths.get(0) != null)) {
-				this.logger.debug("selectedPaths: " + selectedPaths.get(0));
-				cc.putFilesByPath(selectedPaths);
-				db.setContent(cc);
-			}
-		});
-		// setup select on doubleClick
-		this.autocomplete.setOnMouseClicked(e -> {
-			if (e.getButton() == MouseButton.PRIMARY
-			/*
-			 * && e. getClickCount() == 2
-			 */) {
-				this.autocomplete.selectAll();
-			}
-		});
-		this.listUpdater = new Thread(new ListUpdater(this.fileEventQueue, this.fwt.getPackageList()));
-		this.listUpdater.setDaemon(true);
-		this.listUpdater.start();
-		this.logger.debug("Ende init AutocompleteController.");
-	}
+        setupClearButtonField(this.autocomplete);
+        this.pool.submit(this.fwt);
 
-	private void setupClearButtonField(CustomTextField customTextField) {
-		Method m;
-		try {
-			m = TextFields.class.getDeclaredMethod("setupClearButtonField", TextField.class, ObjectProperty.class);
-			m.setAccessible(true);
-			m.invoke(null, customTextField, customTextField.rightProperty());
-		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
-			this.logger.error("Fehler beim Zugriff auf die Methode 'setupClearButtonField' der Klasse Testfield.", e);
-		}
-	}
+        /* final AutoCompletionBinding<String> acb = */
+        TextFields.bindAutoCompletion(this.autocomplete,
+                p -> this.fwt.getPackageList().keySet().stream()
+                        .filter(s -> s.toLowerCase().contains(p.getUserText().toLowerCase()))
+                        .collect(Collectors.toCollection(TreeSet::new)));
+        // setup drag&drop:
+        this.autocomplete.setOnDragDetected(e -> {
+            final Dragboard db = this.autocomplete.startDragAndDrop(TransferMode.COPY);
+            final ClipboardContent cc = new ClipboardContent();
+            final ArrayList<String> selectedPaths = new ArrayList<>();
+            selectedPaths.add(this.fwt.getPackageList().get(this.autocomplete.getText()));
+            if (selectedPaths != null && !selectedPaths.isEmpty() && (selectedPaths.get(0) != null)) {
+                this.logger.debug("selectedPaths: " + selectedPaths.get(0));
+                cc.putFilesByPath(selectedPaths);
+                db.setContent(cc);
+            }
+        });
+        // setup select on doubleClick
+        this.autocomplete.setOnMouseClicked(e -> {
+            if (e.getButton() == MouseButton.PRIMARY
+                /*
+                 * && e. getClickCount() == 2
+                 */) {
+                this.autocomplete.selectAll();
+            }
+        });
+        this.pool.submit(new ListUpdater(this.fileEventQueue, this.fwt.getPackageList()));
+        this.logger.debug("Ende init AutocompleteController.");
+    }
 
-	@FXML
-	public void exitApplication() {
-		this.logger.debug("interrupting ListUpdater Thread...");
-		this.listUpdater.interrupt();
-		// Platform.exit();
-		this.logger.debug("Stopping executor...");
-		this.pool.shutdownNow();
-	}
+    private void setupClearButtonField(CustomTextField customTextField) {
+        Method m;
+        try {
+            m = TextFields.class.getDeclaredMethod("setupClearButtonField", TextField.class, ObjectProperty.class);
+            m.setAccessible(true);
+            m.invoke(null, customTextField, customTextField.rightProperty());
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException e) {
+            this.logger.error("Fehler beim Zugriff auf die Methode 'setupClearButtonField' der Klasse Testfield.", e);
+        }
+    }
+
+    @FXML
+    void exitApplication() {
+        this.logger.debug("Stopping Threadpool...");
+        this.pool.shutdownNow();
+    }
 
 }
