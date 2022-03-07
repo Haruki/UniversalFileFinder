@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin'
+}
+
+group 'gl.hb'
+version '0.7.0'
+
+
+sourceCompatibility = 11
+
+javafx {
+    version='11'
+    modules=['javafx.controls', 'javafx.fxml']
+}
+
+repositories {
+    mavenCentral()
+}
+
+
+ext.junitJupiterVersion = '+'
+
+
+dependencies {
+	compile 'org.openjfx:javafx-controls:11'
+	compile 'org.openjfx:javafx-fxml:11'	
+    compile 'org.slf4j:slf4j-api:+'
+    compile 'com.gluonhq:ignite-guice:+'
+    compile 'com.fasterxml.jackson.core:jackson-core:+'
+    compile 'com.fasterxml.jackson.core:jackson-databind:+'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:+'
+    compile 'org.apache.logging.log4j:log4j-slf4j18-impl:+'
+    compile 'org.apache.logging.log4j:log4j-core:+'
+    compile 'org.controlsfx:controlsfx:8.40.14'
+    testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.pimpelkram.universalfilefinder.Main'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

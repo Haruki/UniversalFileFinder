@@ -1,37 +1,52 @@
-
-
-group 'gl.hb'
-version '0.7.0'
-apply plugin: 'java'
-
-sourceCompatibility = 1.8
+plugins {
+  id 'application'
+  id 'eclipse'
+  id 'org.openjfx.javafxplugin' version '0.0.12'
+  //id 'com.github.johnrengelman.shadow' version "7.1.2"
+}
 
 repositories {
     mavenCentral()
 }
 
-
-ext.junitJupiterVersion = '+'
-
+javafx {
+    version = "17.0.2"
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.base' ]
+}
 
 dependencies {
-    compile 'org.slf4j:slf4j-api:+'
-    compile 'com.gluonhq:ignite-guice:+'
-    compile 'com.fasterxml.jackson.core:jackson-core:+'
-    compile 'com.fasterxml.jackson.core:jackson-databind:+'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:+'
-    compile 'org.apache.logging.log4j:log4j-slf4j18-impl:+'
-    compile 'org.apache.logging.log4j:log4j-core:+'
-    compile 'org.controlsfx:controlsfx:8.40.14'
-    testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+    implementation 'org.slf4j:slf4j-api:+'
+    implementation 'com.gluonhq:ignite-guice:+'
+    implementation 'com.fasterxml.jackson.core:jackson-core:+'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:+'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:+'
+    implementation 'org.apache.logging.log4j:log4j-slf4j18-impl:+'
+    implementation 'org.apache.logging.log4j:log4j-core:+'
+    implementation 'org.controlsfx:controlsfx:11.1.1'
 }
 
+mainClassName = 'com.pimpelkram.universalfilefinder.Main'
+
+eclipse {
+	classpath {
+		file {
+			whenMerged {
+				entries.findAll { it.properties.kind.equals('lib') }.each {
+					it.entryAttributes['module'] = 'true'
+				}
+			}
+		}
+	}
+}
+
+/*
 jar {
     manifest {
-        attributes 'Main-Class': 'com.pimpelkram.universalfilefinder.Main'
+        attributes "Main-Class": "com.pimpelkram.universalfilefinder.Main"
     }
+
     from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
+*/
